@@ -4,9 +4,11 @@ import com.product.trial.dto.ProductDto;
 import com.product.trial.entity.Product;
 import com.product.trial.mapper.ProductMapper;
 import com.product.trial.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +22,8 @@ public class ProductController {
     private final ProductMapper productMapper;
 
     @PostMapping
-    public ResponseEntity<ProductDto> create(@RequestBody ProductDto dto) {
+    public ResponseEntity<ProductDto> create(@Valid @RequestBody ProductDto dto) {
         Product product = productMapper.toEntity(dto);
-        product.setCreatedAt(System.currentTimeMillis());
-        product.setUpdatedAt(System.currentTimeMillis());
         Product saved = productService.createProduct(product);
         return new ResponseEntity<>(productMapper.toDto(saved), HttpStatus.CREATED);
     }
@@ -38,22 +38,15 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getById(@PathVariable Long id) {
-        return productService.getProduct(id)
-                .map(productMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Product product = productService.getProduct(id);
+        return ResponseEntity.ok(productMapper.toDto(product));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ProductDto> update(@PathVariable Long id, @RequestBody ProductDto dto) {
-        return productService.getProduct(id)
-                .map(existing -> {
-                    productMapper.updateEntity(dto, existing);
-                    existing.setUpdatedAt(System.currentTimeMillis());
-                    Product updated = productService.createProduct(existing);
-                    return ResponseEntity.ok(productMapper.toDto(updated));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProductDto> update(@PathVariable Long id, @Valid @RequestBody ProductDto dto) {
+        Product updated = productMapper.toEntity(dto);
+        Product saved = productService.updateProduct(id, updated);
+        return ResponseEntity.ok(productMapper.toDto(saved));
     }
 
 
