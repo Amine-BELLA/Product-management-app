@@ -9,8 +9,8 @@ spring:
     driverClassName: org.postgresql.Driver
     username: ${DB_USER:kata}
     password: ${DB_PASSWORD:pwd}
-    jpa:
-      database-platform: org.hibernate.dialect.PostgreSQLDialect
-      hibernate:
-        ddl-auto: update
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
 

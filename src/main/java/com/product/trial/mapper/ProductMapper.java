@@ -23,18 +23,4 @@ public class ProductMapper {
         }
         return product;
     }
-
-    public void updateEntity(ProductDto dto, Product product) {
-        if (dto.getName() != null) product.setName(dto.getName());
-        if (dto.getCode() != null) product.setCode(dto.getCode());
-        if (dto.getDescription() != null) product.setDescription(dto.getDescription());
-        if (dto.getImage() != null) product.setImage(dto.getImage());
-        if (dto.getCategory() != null) product.setCategory(dto.getCategory());
-        if (dto.getPrice() != null) product.setPrice(dto.getPrice());
-        if (dto.getQuantity() != null) product.setQuantity(dto.getQuantity());
-        if (dto.getInternalReference() != null) product.setInternalReference(dto.getInternalReference());
-        if (dto.getShellId() != null) product.setShellId(dto.getShellId());
-        if (dto.getInventoryStatus() != null) product.setInventoryStatus(InventoryStatus.valueOf(dto.getInventoryStatus()));
-        if (dto.getRating() != null) product.setRating(dto.getRating());
-    }
 }

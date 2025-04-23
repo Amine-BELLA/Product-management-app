@@ -10,7 +10,6 @@ public class ProductDto {
     @NotBlank(message = "Code is mandatory")
     private String code;
 
-    @NotBlank(message = "Name is mandatory")
     private String name;
 
     private String description;
@@ -30,11 +29,8 @@ public class ProductDto {
 
     private Long shellId;
 
-    @NotBlank(message = "Inventory status is mandatory")
-    @Pattern(regexp = "INSTOCK|LOWSTOCK|OUTOFSTOCK", message = "Inventory status must be one of INSTOCK, LOWSTOCK, OUTOFSTOCK")
     private String inventoryStatus;
 
-    @NotNull(message = "Rating is mandatory")
     @DecimalMin(value = "0.0", inclusive = true, message = "Rating must be >= 0")
     @DecimalMax(value = "5.0", inclusive = true, message = "Rating must be <= 5")
     private Double rating;
