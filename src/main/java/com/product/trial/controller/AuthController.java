@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller responsible for authentication-related operations,
+ * including user registration and login.
+ */
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
@@ -24,6 +28,12 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtil;
 
+    /**
+     * Registers a new user account.
+     *
+     * @param request the registration request containing email, username, first name, and password
+     * @return HTTP 200 OK if user is created successfully, or HTTP 400 Bad Request if user already exists
+     */
     @PostMapping("/account")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -40,6 +50,12 @@ public class AuthController {
         return ResponseEntity.ok("User created");
     }
 
+    /**
+     * Authenticates a user and returns a JWT token if credentials are valid.
+     *
+     * @param request the login request containing email and password
+     * @return HTTP 200 OK with a JWT token if authentication is successful,
+     */
     @PostMapping("/token")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
