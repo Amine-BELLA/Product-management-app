@@ -1,4 +1,4 @@
-package com.product.trial.service
+package com.product.trial.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.product.trial.TrialApplication
