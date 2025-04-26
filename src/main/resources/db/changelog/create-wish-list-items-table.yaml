@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: trial-app
+      changes:
+        - createTable:
+            tableName: wish_list_item
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: wishlist_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_wishlist_item_wishlist
+                    references: wish_list(id)
+              - column:
+                  name: product_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_wishlist_item_product
+                    references: products(id)

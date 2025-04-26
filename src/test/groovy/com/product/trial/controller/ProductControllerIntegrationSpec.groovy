@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.product.trial.TrialApplication
 import com.product.trial.entity.Product
 import com.product.trial.repository.ProductRepository
+import com.product.trial.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -27,8 +28,43 @@ class ProductControllerIntegrationSpec extends Specification {
     @Autowired
     ProductRepository productRepository
 
+    @Autowired
+    UserRepository userRepository
+
+    def authToken
+
     def setup() {
         productRepository.deleteAll()
+        userRepository.deleteAll()
+
+        def userJson = '''
+            {
+                "userName": "admin",
+                "firstName": "Admin",
+                "email": "admin@admin.com",
+                "password": "password"
+            }
+            '''
+
+        mockMvc.perform(post("/account")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson))
+
+        def loginJson = '''
+            {
+                "email": "admin@admin.com",
+                "password": "password"
+            }
+            '''
+
+        def loginResponse = mockMvc.perform(post("/token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(loginJson))
+                .andExpect(status().isOk())
+                .andReturn()
+
+        def responseMap = new ObjectMapper().readValue(loginResponse.getResponse().getContentAsString(), Map)
+        authToken = responseMap.token
     }
 
     def "should load trial application context without issues"() {
@@ -56,13 +92,14 @@ class ProductControllerIntegrationSpec extends Specification {
         when:
         def postResult = mockMvc.perform(post("/products")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + authToken)
                 .content(productJson))
 
         then:
         postResult.andExpect(status().isCreated())
 
         when:
-        def getResult = mockMvc.perform(get("/products"))
+        def getResult = mockMvc.perform(get("/products").header("Authorization", "Bearer " + authToken))
 
         then:
         getResult.andExpect(status().isOk())
@@ -88,13 +125,14 @@ class ProductControllerIntegrationSpec extends Specification {
 
         def postResult = mockMvc.perform(post("/products")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + authToken)
                 .content(productJson))
                 .andReturn()
         def createdProductId = new ObjectMapper().readValue(postResult.getResponse().getContentAsString(), Product.class).getId()
 
         when:
         def url = "/products/" + createdProductId
-        def getResult = mockMvc.perform(get(url))
+        def getResult = mockMvc.perform(get(url).header("Authorization", "Bearer " + authToken))
 
         then:
         getResult.andExpect(status().isOk())
@@ -112,6 +150,7 @@ class ProductControllerIntegrationSpec extends Specification {
 
         def patchResult = mockMvc.perform(patch(url)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + authToken)
                 .content(patchJson))
 
         then: "Verify patch response has updated fields"
@@ -120,7 +159,7 @@ class ProductControllerIntegrationSpec extends Specification {
                 .andExpect(jsonPath('$.quantity').value(30))
 
         when: "Retrieve the product again to verify update"
-        def getUpdated = mockMvc.perform(get(url))
+        def getUpdated = mockMvc.perform(get(url).header("Authorization", "Bearer " + authToken))
 
         then: "Updated fields should be present"
         getUpdated.andExpect(status().isOk())
@@ -149,14 +188,15 @@ class ProductControllerIntegrationSpec extends Specification {
 
         def postResult = mockMvc.perform(post("/products")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + authToken)
                 .content(productJson))
                 .andReturn()
         def createdProductId = new ObjectMapper().readValue(postResult.getResponse().getContentAsString(), Product.class).getId()
 
         when: "Deleting and retrieving the product again"
         def url = "/products/" + createdProductId
-        mockMvc.perform(delete(url))
-        def getUpdated = mockMvc.perform(get(url))
+        mockMvc.perform(delete(url).header("Authorization", "Bearer " + authToken))
+        def getUpdated = mockMvc.perform(get(url).header("Authorization", "Bearer " + authToken))
 
         then: "It should return not found"
         getUpdated.andExpect(status().isNotFound()).andExpect(jsonPath('$.error', containsString("not found")))
